@@ -13,7 +13,7 @@ class KIU_Calc(commands.Bot):
 
     async def setup_hook(self):
         for filename in os.listdir(os.path.join(file_location, './holyForge/')):
-            if filename.endswith('.py'):
+            if filename.endswith('.py') and filename.find("weapons_forge") == -1:
                 await self.load_extension(f'holyForge.{filename[:-3]}')
         try:
             synced = await icarus_bot.tree.sync()
