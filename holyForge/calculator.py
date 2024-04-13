@@ -1,8 +1,8 @@
-import discord, os, asyncio, random, requests, json, dictionary
+import discord, enum
 from discord import app_commands
 from discord.ext import commands
-from discord.ext.commands import has_permissions
-import weapons_forge as wf
+from enum import Enum
+from .arsenal import *
 
 #blender (pretty much, classes)
 cw = {3:3, 7:3, 4:7, 2:4, 2.4:8} #claws 1
@@ -30,7 +30,7 @@ eleven = {6:5, 12:11, 10:1, 7:4,8:3, 9:2}
 twelve = {12:12, 6:6, 7:5, 10:2,11:1, 8:4, 9:3}
 
 #the whole package
-allWeapons = {1: wf.claws, 2: wf.orbitars, 3: wf.blades, 4: wf.clubs, 5: wf.bows, 6: wf.arms, 7: wf.staffs, 8: wf.cannons, 9: wf.palms}
+allWeapons = {1: claws, 2: orbitars, 3: blades, 4: clubs, 5: bows, 6: arms, 7: staffs, 8: cannons, 9: palms}
 blender = {1:cw, 2:o, 3:bl, 4:cb, 5:b, 6:a, 7:s, 8:cn, 9:p}
 math = {1:one, 2:two, 3:three, 4:four, 5:five, 6:six, 7:seven, 8:eight, 9:nine, 10:ten, 11:eleven, 12:twelve}
 
@@ -43,24 +43,32 @@ class Calculator(commands.Cog):
 
 #######>COST CALCULATOR<#######
     @app_commands.command(name="weapon-calculator", description="yes")
-    async def whatsTheCost(self, interaction: discord.Interaction, claws: wf.Claws = None, orbitars: wf.Orbitars = None, blades: wf.Blades = None,
-                           clubs: wf.Clubs = None, bows: wf.Bows = None, arms: wf.Arms = None,
-                           staves: wf.Staffs = None, cannons: wf.Cannons = None, palms: wf.Palms = None):
+    async def whatsTheCost(self, interaction: discord.Interaction, claws: Claws = None, orbitars: Orbitars = None, blades: Blades = None,
+                           clubs: Clubs = None, bows: Bows = None, arms: Arms = None,
+                           staves: Staffs = None, cannons: Cannons = None, palms: Palms = None):
+        weapon_id = 0
+        class_id = 0
+        grand_total = ""
+        weapons_iter = [claws, orbitars, blades, clubs, bows, arms, staves, cannons, palms]
 
-        weapon_iter = [claws, orbitars, blades, clubs, bows, arms, staves, cannons, palms]
+        for class_iter, class_spec in enumerate(weapons_iter, start=1):
+            if class_spec:
+                class_id = class_iter
+                weapon_id = int(class_spec.value)
 
-    '''grandTotal = "**" + (allWeapons.get(category)).get(choiceWeapon) + "**\n"
-    #blender and math; weapon category and weapon type
-    for blendy in blender.get(category):
-      for mathy in math.get(choiceWeapon):
-        blendFirst = int(blendy)
-        mathFirst = int(mathy)
-        blendSecond = round((blender.get(category)).get(blendy)) #get second value of current blend
-        mathSecond = (math.get(choiceWeapon)).get(mathy) #get second value of current math
-        grandTotal += (allWeapons.get(blendFirst)).get(mathFirst) + " + " + (allWeapons.get(blendSecond)).get(mathSecond) + "\n"
+        if weapon_id > 0:
+            for blendy in blender.get(class_id):
+                for mathy in math.get(weapon_id):
+                    blend_first = int(blendy)
+                    math_first = int(mathy)
+                    blend_second = round((blender.get(class_id)).get(blendy)) # get second value of current blend
+                    math_second = (math.get(weapon_id)).get(mathy) # get second value of current math
 
-    await ctx.send("```" + grandTotal + "```")'''
+                    grand_total += (allWeapons.get(blend_first)).get(math_first) + " + " + (allWeapons.get(blend_second)).get(math_second) + "\n"
 
+        await interaction.response.send_message(f'# Results for {allWeapons.get(class_id).get(weapon_id)}:\n ```{grand_total}```')
 
-def setup(client):
-  client.add_cog(Calculator(client))
+        ### TO DO TO GET BACK: figure how to get specific weapon when enumerating results; put token in token file
+
+async def setup(bot: commands.Bot) -> None:
+    await bot.add_cog(Calculator(bot))
