@@ -49,24 +49,34 @@ class Calculator(commands.Cog):
         weapon_id = 0
         class_id = 0
         grand_total = ""
+        comedian = False
         weapons_iter = [claws, orbitars, blades, clubs, bows, arms, staves, cannons, palms]
 
         for class_iter, class_spec in enumerate(weapons_iter, start=1):
             if class_spec:
+                if weapon_id > 0:
+                    comedian = True
+                    break
                 class_id = class_iter
                 weapon_id = int(class_spec.value)
 
         if weapon_id > 0:
-            for blendy in blender.get(class_id):
-                for mathy in math.get(weapon_id):
-                    blend_first = int(blendy)
-                    math_first = int(mathy)
-                    blend_second = round((blender.get(class_id)).get(blendy)) # get second value of current blend
-                    math_second = (math.get(weapon_id)).get(mathy) # get second value of current math
+            if comedian:
+                await interaction.response.send_message("You selected more than one weapon. Nice one, pitty!\n- Hades")
+            else:
+                for blendy in blender.get(class_id):
+                    for mathy in math.get(weapon_id):
+                        blend_first = int(blendy)
+                        math_first = int(mathy)
+                        blend_second = round((blender.get(class_id)).get(blendy)) # get second value of current blend
+                        math_second = (math.get(weapon_id)).get(mathy) # get second value of current math
 
-                    grand_total += (allWeapons.get(blend_first)).get(math_first) + " + " + (allWeapons.get(blend_second)).get(math_second) + "\n"
+                        grand_total += (allWeapons.get(blend_first)).get(math_first) + " + " + (allWeapons.get(blend_second)).get(math_second) + "\n"
 
-        await interaction.response.send_message(f'# Results for {allWeapons.get(class_id).get(weapon_id)}:\n ```{grand_total}```')
+                await interaction.response.send_message(f'# Results for {allWeapons.get(class_id).get(weapon_id)}:\n ```{grand_total}```')
+
+        else:
+            await interaction.response.send_message('Well, well, well! Looks like someone forgot to pick their weapon! Oh, the drama!\n- Hades')
 
         ### TO DO TO GET BACK: figure how to get specific weapon when enumerating results; put token in token file
 
