@@ -31,6 +31,7 @@ twelve = {12:12, 6:6, 7:5, 10:2,11:1, 8:4, 9:3}
 
 #the whole package
 allWeapons = {1: claws, 2: orbitars, 3: blades, 4: clubs, 5: bows, 6: arms, 7: staffs, 8: cannons, 9: palms}
+allWeaponNames = {1: "CLAWS", 2: "ORBITARS", 3: "BLADES", 4: "CLUBS", 5: "BOWS", 6: "ARMS", 7: "STAVES", 8: "CANNONS", 9: "PALMS"}
 blender = {1:cw, 2:o, 3:bl, 4:cb, 5:b, 6:a, 7:s, 8:cn, 9:p}
 math = {1:one, 2:two, 3:three, 4:four, 5:five, 6:six, 7:seven, 8:eight, 9:nine, 10:ten, 11:eleven, 12:twelve}
 
@@ -42,12 +43,13 @@ class Calculator(commands.Cog):
   #insert commands here
 
 #######>COST CALCULATOR<#######
-    @app_commands.command(name="weapon-calculator", description="yes")
+    @app_commands.command(name="weapon-calculator", description="Choose one weapon, the command calculates all of the combos of weapons to make your desired weapon")
     async def whatsTheCost(self, interaction: discord.Interaction, claws: Claws = None, orbitars: Orbitars = None, blades: Blades = None,
                            clubs: Clubs = None, bows: Bows = None, arms: Arms = None,
                            staves: Staffs = None, cannons: Cannons = None, palms: Palms = None):
         weapon_id = 0
         class_id = 0
+        class_type_1, class_type_2, class_combo = "", "", ""
         grand_total = ""
         comedian = False
         weapons_iter = [claws, orbitars, blades, clubs, bows, arms, staves, cannons, palms]
@@ -64,16 +66,27 @@ class Calculator(commands.Cog):
             if comedian:
                 await interaction.response.send_message("You selected more than one weapon. Nice one, pitty!\n- Hades")
             else:
+                ## blendy practically lists the combinations of classes
                 for blendy in blender.get(class_id):
+                    ## mathy is the combinations of specific weapons 
                     for mathy in math.get(weapon_id):
                         blend_first = int(blendy)
                         math_first = int(mathy)
                         blend_second = round((blender.get(class_id)).get(blendy)) # get second value of current blend
                         math_second = (math.get(weapon_id)).get(mathy) # get second value of current math
+                        ## get class names so we could make groups of results rather than a massive block
+                        class_type_1 = allWeaponNames.get(blend_first)
+                        class_type_2 = allWeaponNames.get(blend_second)
+
+                        ## if the class combo is new, then save it and add it to the results
+                        if f'{class_type_1} + {class_type_2}' != class_combo:
+                            class_combo = f'{class_type_1} + {class_type_2}'
+                            grand_total += f'\n>>>{class_combo}<<<\n'
 
                         grand_total += (allWeapons.get(blend_first)).get(math_first) + " + " + (allWeapons.get(blend_second)).get(math_second) + "\n"
 
                 await interaction.response.send_message(f'# Results for {allWeapons.get(class_id).get(weapon_id)}:\n ```{grand_total}```')
+                grand_total = ""
 
         else:
             await interaction.response.send_message('Well, well, well! Looks like someone forgot to pick their weapon! Oh, the drama!\n- Hades')
